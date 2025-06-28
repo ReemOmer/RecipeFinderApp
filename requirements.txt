@@ -1,0 +1,12 @@
+beautifulsoup4
+couchbase
+dotenv
+huggingface-hub
+requests
+scikit-learn
+sentence-transformers
+streamlit
+tokenizers
+torch
+transformers
+nest-asyncio
