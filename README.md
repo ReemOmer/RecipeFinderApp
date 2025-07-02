@@ -31,10 +31,23 @@ This application aims to help users enter their ingredients at home and find rec
 ```bash
 # Start Docker container
 bash run.sh
+```
 
-# Inside the Docker container, start the Streamlit app
+Inside the Docker container, run the main.py file to fill the database with the embeddings, all recipes features will be stored, as the example below:
+
+![Couchbase Document Sample](CBScreenshot.png)
+
+```python
+python main.py
+```
+Now, start the streamlit application by running the command below:
+
+```bash
+# Start the app
 streamlit run app.py
 ```
+
+Test the application by entering some ingredents you have, then the most similar recipes will appear in a menu form.
 
 ### Part 2: Recipe Data Enrichment
 
@@ -52,6 +65,10 @@ bash run.sh
 
 # Run the scraper to create pinch_of_yum_recipes.json
 python RecipeScraper.py
+
+# Run the cleaning and storing in DB code by
+
+python RecipeProcessing.py
 
 # This creates:
 # - pinch_of_yum_recipes.json (raw scraped data)
@@ -105,8 +122,11 @@ nest-asyncio
 2. **Download the dataset**: Download the Food.com recipes dataset from Kaggle and place it as `dataset/recipes.csv`
 3. Ensure Docker is installed
 4. Run `bash run.sh` to start the Docker container
-5. Execute `streamlit run app.py` inside the container
-6. Access the application at `http://localhost:8501`
+5. Run `python main.py` to clean and store the data from Food.com
+6. Execute `streamlit run app.py` inside the container to start the application
+7. Access the application at `http://localhost:8501`
+8. Run `python RecipeScraper.py` inside the container to scrape data from pinshofyum.com
+9. Run `python RecipeProcessing.py` inside the container to clean and store more data in the database
 
 ## Usage
 
@@ -118,14 +138,15 @@ nest-asyncio
 
 ## Contributing
 
-To add more recipe sources, follow the pattern established in Part 2:
-1. Create a scraper for the new website
-2. Process and clean the data
-3. Generate embeddings and store in the database
+1. Create a scraper for the new website to add more recipes
+2. Find a way to set a weight for ingredients, for example, in the burger sandwish, the burger has to have higher weight than a slice of tomatos, the current application assumes that all the ingredients have the same level of importance
+3. Improve the process and clean functions in the `RecipeProcessing.py` file
+4. Fix the order of entering the ingredients, as the current process find the vector embedding with the same exact order of ingredients that the user uses, for example, (sugar, blueberries) will have a slightly different vector embedding than (blueberries, sugar)
+4. Fasten the process of obtaining the embeddings by using indexing, or a different similarity search than consine similarity
 
 ### Current Limitations & Contribution Opportunities
 
-- **Calories Data**: Currently, calories are not scraped from additional recipe sources (like Pinch of Yum). The system generates random calorie values (100-300) for scraped recipes. Adding actual calorie extraction from recipe websites would significantly improve the accuracy and usefulness of the nutritional information displayed to users.
+- **Calories Data**: Currently, calories are not scraped from additional recipe sources (Pinch of Yum). The system generates random calorie values (100-300) for scraped recipes. Adding actual calorie extraction from recipe websites would significantly improve the accuracy and usefulness of the nutritional information displayed to users.
 
 - **Additional Nutritional Information**: Beyond calories, other nutritional data (protein, carbs, fat, vitamins) could be extracted and stored.
 
