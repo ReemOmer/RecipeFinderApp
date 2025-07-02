@@ -2,25 +2,9 @@ import os
 import re
 os.environ["STREAMLIT_WATCHER_TYPE"] = "none"
 os.environ["STREAMLIT_SERVER_RUN_ON_SAVE"] = "false"
-
+from SimilaritySearch import SimilaritySearch
 import streamlit as st
-st.cache_data.clear()
-st.cache_resource.clear()
 
-try:
-    import nest_asyncio
-    nest_asyncio.apply()
-except ImportError:
-    pass
-
-def get_similarity_search(ingredients):
-    """Safely import and instantiate SimilaritySearch"""
-    try:
-        from SimilaritySearch import SimilaritySearch
-        return SimilaritySearch(ingredients)
-    except Exception as e:
-        st.error(f"Error importing SimilaritySearch: {str(e)}")
-        return None
 
 def extract_first_image_url(images_string):
     """
@@ -57,8 +41,8 @@ with st.form("recipe_search_form"):
 if submitted:
     if user_ingredients.strip():
         st.info("Searching for similar recipes...")
-        
-        similarity_search = get_similarity_search(user_ingredients)
+
+        similarity_search = SimilaritySearch(user_ingredients)            
         
         if similarity_search:
             try:
@@ -69,9 +53,10 @@ if submitted:
                 st.stop()
             
             try:
+                
                 similar_recipes = similarity_search.find_similar_recipes(top_k=top_k, threshold=min_similarity)
-
-                if similar_recipes:
+                
+                if similar_recipes and len(similar_recipes) > 0:
                     st.success(f"Found {len(similar_recipes)} potential recipes!")
                     
                     for i, item in enumerate(similar_recipes, 1):
@@ -140,6 +125,7 @@ if submitted:
                                     st.caption(f"Recipe ID: {recipe['recipe_id']}")
                 else:
                     st.warning("No matching recipes found in the database.")
+
             except Exception as e:
                 st.error(f"Error retrieving recipes: {str(e)}")
                 import traceback

@@ -1,6 +1,6 @@
 beautifulsoup4
 couchbase
-dotenv
+python-dotenv
 huggingface-hub
 requests
 scikit-learn
@@ -10,3 +10,4 @@ tokenizers
 torch
 transformers
 nest-asyncio
+asyncio

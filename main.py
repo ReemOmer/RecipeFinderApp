@@ -1,3 +1,5 @@
+import nest_asyncio
+nest_asyncio.apply()
 import requests
 import pandas as pd
 from DataManager import DataManager
@@ -8,7 +10,7 @@ df = df[['RecipeId', 'Name', 'PrepTime', 'TotalTime', 'Images', 'RecipeCategory'
          'RecipeIngredientQuantities', 'RecipeIngredientParts', 'AggregatedRating', 'Calories']]
 
 df.dropna(inplace=True)
-df = df[:2]
+# df = df[:10]
 
 def combine_ingredients(ingredients_str):
     if isinstance(ingredients_str, str):
@@ -30,10 +32,15 @@ def clean_ingredients_column(df, column_name):
             "stream": False,
             "options": {"temperature": 0.1, "max_tokens": 200}
         }
-        response = requests.post("http://localhost:11434/api/generate", json=payload)
-        result = response.json().get('response', '').strip()
-        ingredients = [ing.strip().title() for ing in result.split(',') if ing.strip()]
-        return ingredients if ingredients else []
+        try:
+            response = requests.post("http://host.docker.internal:11434/api/generate", json=payload)
+            response.raise_for_status()
+            result = response.json().get('response', '').strip()
+            ingredients = [ing.strip().title() for ing in result.split(',') if ing.strip()]
+            return ingredients if ingredients else []
+        except Exception as e:
+            print(f'Ollama request failed: {e}')
+            return []
     
     df[column_name] = df[column_name].apply(clean_single)
     return df
@@ -43,8 +50,6 @@ df = clean_ingredients_column(df, 'RecipeIngredientParts')
 
 recipe_embedding = RecipeEmbedding(model_name='all-MiniLM-L6-v2')
 data_manager = DataManager()
-
-data_manager.delete_all()
 
 for index, row in df.iterrows():
     recipe_id = str(row['RecipeId'])

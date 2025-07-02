@@ -53,4 +53,7 @@ class DataManager:
         return self.collection.remove(key)
     
     def delete_all(self):
-        return self.cluster.query("DELETE FROM `" + self.bucket_name + "`")    
+        query = f"SELECT META().id FROM `{self.bucket_name}`.`{self.scope_name}`.`{self.collection_name}`"
+        result = self.cluster.query(query)
+        for row in result:
+            self.collection.remove(row['id'])    
